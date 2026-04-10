@@ -31,7 +31,20 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
 .env*.local
+
+# tooling / agent files
+.agents/
+.claude-flow/
+.claude/
+.mcp.json
+.stitch/
+.superpowers/
+.vscode/
+skills-lock.json
+k
 
 # typescript
 *.tsbuildinfo
