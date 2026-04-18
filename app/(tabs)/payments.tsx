@@ -5,7 +5,6 @@ import {
   SectionList,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -99,21 +98,17 @@ export default function PaymentsScreen() {
 
   useFocusEffect(useCallback(() => { load(); }, []));
 
-  async function handleMarkPaid(cycleId: string) {
-    Alert.alert('Mark as paid', 'Mark this payment as paid?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Mark paid',
-        onPress: async () => {
-          const cycle = sections.flatMap((s) => s.data).find((p) => p.id === cycleId);
-          const amountPaid = cycle?.is_minimum_only
-            ? (cycle.minimum_payment ?? 0)
-            : (cycle?.statement_balance ?? 0);
-          await supabase.from('billing_cycles').update({ is_paid: true, amount_paid: amountPaid }).eq('id', cycleId);
-          load();
-        },
-      },
-    ]);
+  async function confirmMarkPaid(cycleId: string) {
+    const cycle = sections.flatMap((s) => s.data).find((p) => p.id === cycleId);
+    const amountPaid = cycle?.is_minimum_only
+      ? (cycle.minimum_payment ?? 0)
+      : (cycle?.statement_balance ?? 0);
+    await supabase.from('billing_cycles').update({ is_paid: true, amount_paid: amountPaid }).eq('id', cycleId);
+    load();
+  }
+
+  function handleMarkPaid(cycleId: string) {
+    confirmMarkPaid(cycleId);
   }
 
   if (loading) {
@@ -168,6 +163,7 @@ export default function PaymentsScreen() {
         renderItem={({ item }) => <PaymentItem payment={item} onMarkPaid={handleMarkPaid} />}
         ListFooterComponent={sections.length > 0 ? <View style={{ marginTop: 32 }}><AdBanner /></View> : null}
       />
+
     </SafeAreaView>
   );
 }

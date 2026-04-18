@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { PaymentWithCard, PaymentStatus } from '@/lib/types';
 import { formatCurrency, formatShortDate } from '@/lib/float';
@@ -15,6 +16,7 @@ const STATUS_COLORS: Record<PaymentStatus, string> = {
 };
 
 export default function PaymentItem({ payment, onMarkPaid }: Props) {
+  const [confirming, setConfirming] = useState(false);
   const accentColor = STATUS_COLORS[payment.paymentStatus];
 
   return (
@@ -67,17 +69,35 @@ export default function PaymentItem({ payment, onMarkPaid }: Props) {
               ? `min · bal ${formatCurrency(payment.statement_balance)}`
               : `of ${formatCurrency(payment.statement_balance)}`}
           </Text>
+
           {!payment.is_paid ? (
-            <TouchableOpacity
-              onPress={() => onMarkPaid(payment.id)}
-              style={{
-                borderWidth: 1.5, borderColor: '#0A84FF', borderRadius: 8,
-                paddingHorizontal: 12, paddingVertical: 5, marginTop: 4,
-              }}
-              activeOpacity={0.7}
-            >
-              <Text style={{ color: '#0A84FF', fontSize: 13, fontWeight: '600' }}>Mark paid</Text>
-            </TouchableOpacity>
+            confirming ? (
+              <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                <TouchableOpacity
+                  onPress={() => setConfirming(false)}
+                  style={{ borderWidth: 1, borderColor: '#E5E5EA', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}
+                >
+                  <Text style={{ color: '#8E8E93', fontSize: 13, fontWeight: '500' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => { setConfirming(false); onMarkPaid(payment.id); }}
+                  style={{ backgroundColor: '#34C759', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '600' }}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => setConfirming(true)}
+                style={{
+                  borderWidth: 1.5, borderColor: '#0A84FF', borderRadius: 8,
+                  paddingHorizontal: 12, paddingVertical: 5, marginTop: 4,
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: '#0A84FF', fontSize: 13, fontWeight: '600' }}>Mark paid</Text>
+              </TouchableOpacity>
+            )
           ) : (
             <View style={{
               backgroundColor: 'rgba(52,199,89,0.12)', borderRadius: 6,
